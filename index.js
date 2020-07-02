@@ -10,7 +10,6 @@ const readFile = (filename, encoding) => {
     return fs.readFileSync(filename).toString(encoding);
   }
   catch (e) {
-    console.log(e);
     return null;
   }
 };
@@ -19,9 +18,9 @@ const textBody=readFile("mail.txt","utf8")
 const htmlBody=readFile("mail.html","utf8")
 
 const readInterface = readline.createInterface({
-    input: fs.createReadStream('maillist.txt'),
-    output: process.stdout,
-    console: false
+    input: fs.createReadStream(process.argv[2]),
+//    output: process.stdout,
+//    console: false
 });
 
 // create reusable transporter object using the default SMTP transport
@@ -35,15 +34,25 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-readInterface.on('line', function(line) {
-  sendMail(line).catch((err) => {
-    console.log(err)
-    fs.appendFile('error.txt', line + "\n", function (err) {
-      if (err) throw err;
-      console.log(line + " " + err)
+async function main() {
+  for await (const line of readInterface) {
+    sendMail(line).catch((err) => {
+      console.log(err)
+      fs.appendFile('error.txt', line + "\n", function (err) {
+        if (err) throw err;
+        console.log(line + " " + err)
+      });
     });
-  });
-})
+    await sleep(process.env.DELAY)
+  }
+}
+
+function sleep(ms){
+  return new Promise(resolve=>{
+    setTimeout(resolve,ms)
+  })
+}
+
 
 async function sendMail(mailTo) {
   // send mail with defined transport object
@@ -62,3 +71,5 @@ async function sendMail(mailTo) {
     console.log("SUCCESS: " + mailTo + " - " + info.messageId + "\n");
   });
 }
+
+main()

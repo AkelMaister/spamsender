@@ -3,3 +3,5 @@ mail.html
 mail.txt
 maillist.txt
 node_modules/*
+error.txt
+success.txt
