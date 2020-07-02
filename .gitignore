@@ -1,0 +1,5 @@
+.env
+mail.html
+mail.txt
+maillist.txt
+node_modules/*
